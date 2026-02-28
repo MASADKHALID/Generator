@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Certificate Generator</title>
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Libraries via CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+</head>
+
+<body>
+    <div class="app-container">
+        <header>
+            <h1>Certificate & ID Generator</h1>
+            <p>Upload a template and your data to generate customized PDFs instantly.</p>
+        </header>
+
+        <main>
+            <div class="mode-selector" id="mode-selector">
+                <label>
+                    <input type="radio" name="app-mode" value="certificate" checked>
+                    <strong>Certificate Mode</strong> (Static Signature)
+                </label>
+                <label>
+                    <input type="radio" name="app-mode" value="idcard">
+                    <strong>ID Card Mode</strong> (Dynamic Photos)
+                </label>
+            </div>
+
+            <section class="upload-section">
+                <div class="upload-box" id="template-upload-box">
+                    <h3>1. Upload Template Image</h3>
+                    <p>Provide the background image (JPG or PNG).</p>
+                    <input type="file" id="template-input" accept="image/png, image/jpeg">
+                </div>
+
+                <div class="upload-box" id="data-upload-box">
+                    <h3>2. Upload Data File</h3>
+                    <p>Provide a CSV or Excel file containing the names & signature filenames.</p>
+                    <input type="file" id="data-input"
+                        accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel">
+                </div>
+
+                <div class="upload-box" id="sig-upload-box">
+                    <h3>3. Upload Signature Graphic</h3>
+                    <p>Provide the transparent signature (PNG) you want on <b>all</b> certificates.</p>
+                    <input type="file" id="sig-input" accept="image/png, image/jpeg">
+                </div>
+
+                <div class="upload-box hidden" id="id-photo-upload-box">
+                    <h3>3. Upload Dynamic ID Photos (ZIP)</h3>
+                    <p>Provide a <b>Single .zip File</b> containing all the photos (PNG/JPG). Names inside the zip must
+                        match your CSV data exactly (e.g., <code>ali.jpg</code>).</p>
+                    <input type="file" id="id-photo-input" accept=".zip">
+                </div>
+            </section>
+
+            <section class="editor-section hidden" id="editor-section">
+                <div class="toolbar">
+                    <div class="control-group">
+                        <label for="column-select">Add New Field:</label>
+                        <select id="column-select"></select>
+                        <button id="add-text-btn" class="btn secondary">Add Text</button>
+                        <button id="add-image-btn" class="btn secondary">Add The Signature</button>
+                        <button id="add-id-photo-btn" class="btn secondary hidden">Add ID Photo</button>
+                    </div>
+
+                    <div class="control-group feature-panel" id="settings-panel">
+                        <div class="panel-header">
+                            <strong>Settings for Selected Block:</strong>
+                            <span id="selected-indicator">None</span>
+                        </div>
+                        <div class="panel-controls">
+                            <input type="number" id="font-size" value="40" min="10" max="800"
+                                title="Font Size / Image Width" disabled>
+                            <input type="color" id="font-color" value="#000000" title="Font Color (Text Only)" disabled>
+                            <select id="font-family" disabled>
+                                <option value="Arial">Arial</option>
+                                <option value="Times New Roman">Times New Roman</option>
+                                <option value="Courier New">Courier New</option>
+                                <option value="Georgia">Georgia</option>
+                            </select>
+                            <button id="delete-btn" class="btn danger" disabled>Remove Block</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="canvas-container">
+                    <canvas id="preview-canvas"></canvas>
+                </div>
+
+                <div class="instructions">
+                    <p>👆 <strong>Drag and drop</strong> the text elements on the canvas to position them exactly
+                        where
+                        they should appear on the PDF.</p>
+                </div>
+
+                <div class="action-bar">
+                    <div class="status" id="generation-status">Ready to generate.</div>
+                    <button id="generate-btn" class="btn primary">Generate Zip of PDFs</button>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
