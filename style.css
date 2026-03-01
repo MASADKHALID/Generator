@@ -32,6 +32,8 @@ body {
     background-size: 400% 400%;
     animation: gradientBG 15s ease infinite;
     min-height: 100vh;
+    height: auto;
+    overflow-y: auto;
     color: var(--text-main);
     line-height: 1.6;
     padding: 2rem 1rem;
@@ -73,7 +75,7 @@ strong {
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-xl), 0 0 40px rgba(99, 102, 241, 0.1);
     border: 1px solid rgba(255, 255, 255, 0.6);
-    overflow: hidden;
+    overflow: visible;
     animation: fadeInFloat 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     transform: translateY(20px);
     opacity: 0;
