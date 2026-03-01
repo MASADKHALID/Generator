@@ -1,3 +1,50 @@
+// --- Help Modal Logic ---
+const helpBtn = document.getElementById('help-btn');
+const helpModal = document.getElementById('help-modal');
+const helpContent = document.getElementById('help-content');
+const closeHelpModal = document.getElementById('close-help-modal');
+
+helpBtn.addEventListener('click', () => {
+    // Hardcoded help instructions as HTML <p> tags
+    helpContent.innerHTML = `
+        <p style='font-weight:bold;'>Certificate & ID Generator - Help Guide</p>
+        <p>Welcome! This guide will help you use the Certificate & ID Generator web app step by step.</p>
+        <p style='font-weight:bold;'>1. Choose a Mode</p>
+        <p><b>Certificate Mode:</b> For certificates with a static or multiple signatures.</p>
+        <p><b>ID Card Mode:</b> For ID cards with dynamic photos for each person.</p>
+        <p style='font-weight:bold;'>2. Upload Your Template</p>
+        <p>Click <b>"Upload Template Image"</b> and select a background image (JPG or PNG) for your certificate or ID card.</p>
+        <p style='font-weight:bold;'>3. Upload Your Data File</p>
+        <p>Click <b>"Upload Data File"</b> and select your CSV or Excel file. Your file should have columns for names and, if needed, a column for photo or signature filenames.</p>
+        <p style='font-weight:bold;'>4. Upload Signatures or Photos</p>
+        <p><b>Certificate Mode:</b> Click <b>"Upload Signature Graphic"</b> and select one or more signature images (PNG/JPG). You can upload multiple signatures at once.</p>
+        <p><b>ID Card Mode:</b> Click <b>"Upload Dynamic ID Photos (ZIP)"</b> and select a ZIP file containing all photos (PNG/JPG). The photo filenames (without extension) must match the values in your data file's photo column.</p>
+        <p><b>IMPORTANT:</b> For best results, all ID photos should have the same dimensions (width and height). This avoids stretching or resizing issues.</p>
+        <p style='font-weight:bold;'>5. Add Fields to the Template</p>
+        <p>Use the <b>"Add New Field"</b> dropdown to select a column from your data file. Click <b>"Add Text"</b> to add a text field for that column. Click <b>"Add The Signature"</b> to add a signature block. If you uploaded multiple signatures, you can select which one to use for each block in the settings panel. (ID Mode) Click <b>"Add ID Photo"</b> to add a photo block linked to your photo column.</p>
+        <p style='font-weight:bold;'>6. Arrange and Customize Fields</p>
+        <p>Drag and drop fields on the canvas to position them. Click a field to select it and adjust its font, color, or size in the settings panel. For signature blocks, use the dropdown in the settings panel to choose which signature image to use. To remove a field, select it and click <b>"Remove Block"</b>.</p>
+        <p style='font-weight:bold;'>7. Generate Certificates/ID Cards</p>
+        <p>When ready, click <b>"Generate Zip of PDFs"</b>. The app will create a PDF for each row in your data file, using the template and your fields. All PDFs will be zipped and downloaded automatically.</p>
+        <p style='font-weight:bold;'>Tips & Troubleshooting</p>
+        <p>Make sure your data file's photo/signature column matches the uploaded filenames (case-insensitive, extension optional).</p>
+        <p>If a photo or signature does not appear, check for typos or extra spaces in your data file or filenames.</p>
+        <p>You can move, edit, or delete any field before generating.</p>
+        <p>For best results, use high-resolution template and signature images.</p>
+        <hr/>
+        <p>If you have any issues, double-check your file formats and column names, and make sure all images are uploaded correctly.</p>
+    `;
+    helpModal.classList.remove('hidden');
+});
+
+closeHelpModal.addEventListener('click', () => {
+    helpModal.classList.add('hidden');
+});
+
+// Hide modal on background click
+helpModal.addEventListener('click', (e) => {
+    if (e.target === helpModal) helpModal.classList.add('hidden');
+});
 const templateInput = document.getElementById('template-input');
 const dataInput = document.getElementById('data-input');
 const sigInput = document.getElementById('sig-input');
@@ -25,7 +72,8 @@ const deleteBtn = document.getElementById('delete-btn');
 
 let templateImage = null;
 let parsedData = []; // Array of objects
-let uploadedSignature = null; // The single static signature image object
+// let uploadedSignature = null; // The single static signature image object
+let uploadedSignatures = {}; // Map of filename (no ext, lower) -> Image object
 let uploadedIdPhotos = {}; // Map of filename -> ID Photo Object
 let textElements = []; // { id, type: 'text'|'image'|'id-photo', x, y, text, column, fontSize, fontColor, fontFamily }
 let isDragging = false;
@@ -114,19 +162,22 @@ dataInput.addEventListener('change', (e) => {
 
 // Handle Signature Upload
 sigInput.addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    if (file) {
+    const files = Array.from(e.target.files);
+    uploadedSignatures = {};
+    files.forEach(file => {
         const reader = new FileReader();
         reader.onload = (event) => {
             const img = new Image();
             img.onload = () => {
-                uploadedSignature = img;
-                renderCanvas(); // Re-render in case an image block is already on canvas
+                const baseName = file.name.split('/').pop().split('\\').pop().trim();
+                const nameNoExt = baseName.replace(/\.[^/.]+$/, '').toLowerCase();
+                uploadedSignatures[nameNoExt] = img;
+                renderCanvas();
             };
             img.src = event.target.result;
         };
         reader.readAsDataURL(file);
-    }
+    });
 });
 
 // Handle Zip File containing ID Photos
@@ -152,8 +203,11 @@ idPhotoInput.addEventListener('change', async (e) => {
                 continue;
             }
 
-            // Extract the filename without the path (e.g. "folder/ali.jpg" -> "ali.jpg")
+            // Extract the filename without the path (e.g. "folder/asad.jpg" -> "asad.jpg")
             const baseName = filename.split('/').pop().trim();
+            // Remove the extension to support simple names in CSV (e.g. "asad.jpg" -> "asad")
+            const nameWithoutExtension = baseName.replace(/\.[^/.]+$/, "");
+            const lowerCaseKey = nameWithoutExtension.toLowerCase();
 
             // Read the image file as a Data URL instead of blob to avoid cross-browser blob URL issues in Canvas
             const dataUrl = await zipEntry.async("base64");
@@ -162,7 +216,8 @@ idPhotoInput.addEventListener('change', async (e) => {
             // Load into an Image object
             const img = new Image();
             img.onload = () => {
-                uploadedIdPhotos[baseName] = img;
+                // Key the photo library by the name WITHOUT the extension, fully lowercased
+                uploadedIdPhotos[lowerCaseKey] = img;
                 loadedCount++;
                 if (loadedCount % 5 === 0 || loadedCount === totalFiles) {
                     renderCanvas();
@@ -229,7 +284,8 @@ function addTextBlock(columnName, type) {
         y: canvas.height / 2,
         fontSize: (type === 'image' || type === 'id-photo') ? 150 : 40, // For images, fontSize acts as width
         fontColor: '#000000',
-        fontFamily: 'Arial'
+        fontFamily: 'Arial',
+        signatureKey: (type === 'image') ? Object.keys(uploadedSignatures)[0] || null : null // Default to first signature
     };
     textElements.push(newElement);
     selectElement(newElement);
@@ -281,6 +337,43 @@ fontSizeInput.addEventListener('input', updateSingleTextSetting);
 fontColorInput.addEventListener('input', updateSingleTextSetting);
 fontFamilyInput.addEventListener('change', updateSingleTextSetting);
 
+// Add signature selector for image blocks
+let sigSelector = null;
+function updateSignatureSelector() {
+    if (!settingsPanel) return;
+    if (sigSelector) {
+        sigSelector.remove();
+        sigSelector = null;
+    }
+    if (selectedElement && selectedElement.type === 'image') {
+        sigSelector = document.createElement('select');
+        sigSelector.style.marginLeft = '1rem';
+        Object.keys(uploadedSignatures).forEach(key => {
+            const opt = document.createElement('option');
+            opt.value = key;
+            opt.textContent = key;
+            if (selectedElement.signatureKey === key) opt.selected = true;
+            sigSelector.appendChild(opt);
+        });
+        sigSelector.addEventListener('change', function() {
+            selectedElement.signatureKey = this.value;
+            renderCanvas();
+        });
+        // Insert after font family input
+        const fontFamilyInput = document.getElementById('font-family');
+        fontFamilyInput.parentNode.insertBefore(sigSelector, fontFamilyInput.nextSibling);
+    }
+}
+
+// Update signature selector when selection changes
+const originalSelectElement = selectElement;
+selectElement = function(element) {
+    selectedElement = element;
+    // ...existing code...
+    updateSignatureSelector();
+    if (typeof originalSelectElement === 'function') originalSelectElement.apply(this, arguments);
+}
+
 function updateSingleTextSetting() {
     if (selectedElement) {
         selectedElement.fontSize = parseInt(fontSizeInput.value, 10);
@@ -321,9 +414,10 @@ function renderCanvas(customDataRow = null) {
             width = el.fontSize; // We use fontSize to store width
             height = width / 2; // Rough 2:1 placeholder ratio
 
-            // Check if we have the static uploaded signature
-            if (uploadedSignature) {
-                const img = uploadedSignature;
+            // Multiple signature support
+            let sigKey = el.signatureKey || Object.keys(uploadedSignatures)[0];
+            let img = sigKey ? uploadedSignatures[sigKey] : null;
+            if (img) {
                 height = (img.height / img.width) * width; // Maintain aspect ratio
                 ctx.drawImage(img, el.x - width / 2, el.y - height / 2, width, height);
             } else {
@@ -340,12 +434,24 @@ function renderCanvas(customDataRow = null) {
             width = el.fontSize; // We use fontSize to store width
             height = width; // Default to square if not loaded
 
-            // Clean up textToDraw just in case CSV has extra spaces compared to filenames
-            const cleanText = textToDraw ? textToDraw.toString().trim() : '';
+            // Clean up textToDraw just in case CSV has extra spaces or accidentaly includes the extension
+            let cleanText = textToDraw ? textToDraw.toString().trim().toLowerCase() : '';
+            let cleanTextNoExt = cleanText.replace(/\.[^/.]+$/, "");
 
-            // Check if we have an uploaded photo matching the row text
-            if (uploadedIdPhotos[cleanText]) {
-                const img = uploadedIdPhotos[cleanText];
+            // Debug: log what we're searching for and what is available
+            if (window && window.console) {
+                console.log('Looking for photo:', cleanTextNoExt, 'or', cleanText);
+                console.log('Available photos:', Object.keys(uploadedIdPhotos));
+            }
+
+            // Try both with and without extension for maximum flexibility
+            let img = null;
+            if (uploadedIdPhotos[cleanTextNoExt]) {
+                img = uploadedIdPhotos[cleanTextNoExt];
+            } else if (uploadedIdPhotos[cleanText]) {
+                img = uploadedIdPhotos[cleanText];
+            }
+            if (img) {
                 height = (img.height / img.width) * width; // Maintain aspect ratio
                 ctx.drawImage(img, el.x - width / 2, el.y - height / 2, width, height);
             } else {
@@ -407,7 +513,9 @@ canvas.addEventListener('mousedown', (e) => {
         } else if (el.type === 'id-photo') {
             width = el.fontSize;
             const textToDraw = parsedData.length > 0 ? (parsedData[0][el.column] !== undefined ? parsedData[0][el.column] : el.text) : el.text;
-            const cleanText = textToDraw ? textToDraw.toString().trim() : '';
+            let cleanText = textToDraw ? textToDraw.toString().trim().toLowerCase() : '';
+            cleanText = cleanText.replace(/\.[^/.]+$/, "");
+
             if (uploadedIdPhotos[cleanText]) {
                 const img = uploadedIdPhotos[cleanText];
                 height = (img.height / img.width) * width;
@@ -416,8 +524,9 @@ canvas.addEventListener('mousedown', (e) => {
             }
         } else { // type === 'image'
             width = el.fontSize; // fontSize stores width for images
-            if (uploadedSignature) {
-                const img = uploadedSignature;
+            let sigKey = el.signatureKey || Object.keys(uploadedSignatures)[0];
+            let img = sigKey ? uploadedSignatures[sigKey] : null;
+            if (img) {
                 height = (img.height / img.width) * width;
             } else {
                 height = width / 2; // Placeholder ratio

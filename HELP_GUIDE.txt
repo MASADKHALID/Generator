@@ -1,0 +1,49 @@
+# Certificate & ID Generator - Help Guide
+
+Welcome! This guide will help you use the Certificate & ID Generator web app step by step.
+
+## 1. Choose a Mode
+- **Certificate Mode:** For certificates with a static or multiple signatures.
+- **ID Card Mode:** For ID cards with dynamic photos for each person.
+
+## 2. Upload Your Template
+- Click **"Upload Template Image"** and select a background image (JPG or PNG) for your certificate or ID card.
+
+## 3. Upload Your Data File
+- Click **"Upload Data File"** and select your CSV or Excel file.
+- Your file should have columns for names and, if needed, a column for photo or signature filenames.
+
+## 4. Upload Signatures or Photos
+- **Certificate Mode:**
+  - Click **"Upload Signature Graphic"** and select one or more signature images (PNG/JPG).
+  - You can upload multiple signatures at once.
+- **ID Card Mode:**
+  - Click **"Upload Dynamic ID Photos (ZIP)"** and select a ZIP file containing all photos (PNG/JPG).
+  - The photo filenames (without extension) must match the values in your data file's photo column.
+
+## 5. Add Fields to the Template
+- Use the **"Add New Field"** dropdown to select a column from your data file.
+- Click **"Add Text"** to add a text field for that column.
+- Click **"Add The Signature"** to add a signature block. If you uploaded multiple signatures, you can select which one to use for each block in the settings panel.
+- (ID Mode) Click **"Add ID Photo"** to add a photo block linked to your photo column.
+
+## 6. Arrange and Customize Fields
+- Drag and drop fields on the canvas to position them.
+- Click a field to select it and adjust its font, color, or size in the settings panel.
+- For signature blocks, use the dropdown in the settings panel to choose which signature image to use.
+- To remove a field, select it and click **"Remove Block"**.
+
+## 7. Generate Certificates/ID Cards
+- When ready, click **"Generate Zip of PDFs"**.
+- The app will create a PDF for each row in your data file, using the template and your fields.
+- All PDFs will be zipped and downloaded automatically.
+
+## Tips & Troubleshooting
+- Make sure your data file's photo/signature column matches the uploaded filenames (case-insensitive, extension optional).
+- If a photo or signature does not appear, check for typos or extra spaces in your data file or filenames.
+- You can move, edit, or delete any field before generating.
+- For best results, use high-resolution template and signature images.
+
+---
+
+If you have any issues, double-check your file formats and column names, and make sure all images are uploaded correctly.

@@ -1,3 +1,11 @@
+    <button id="help-btn" class="btn secondary" style="position: fixed; top: 20px; right: 20px; z-index: 1000; color: #ef4444;">Help</button>
+    <!-- Help Modal -->
+    <div id="help-modal" class="hidden" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.5); z-index: 2000; display: flex; align-items: center; justify-content: center;">
+        <div style="background: #fff; max-width: 600px; width: 90vw; max-height: 80vh; overflow-y: auto; border-radius: 16px; box-shadow: 0 8px 32px rgba(0,0,0,0.2); padding: 2rem; position: relative;">
+            <button id="close-help-modal" style="position: absolute; top: 1rem; right: 1rem; background: #eee; border: none; border-radius: 50%; width: 2rem; height: 2rem; font-size: 1.2rem; cursor: pointer;">&times;</button>
+            <div id="help-content" style="white-space: pre-wrap; font-family: inherit; font-size: 1rem; background: none; border: none; margin: 0; padding: 0;"></div>
+        </div>
+    </div>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -51,7 +59,7 @@
                 <div class="upload-box" id="sig-upload-box">
                     <h3>3. Upload Signature Graphic</h3>
                     <p>Provide the transparent signature (PNG) you want on <b>all</b> certificates.</p>
-                    <input type="file" id="sig-input" accept="image/png, image/jpeg">
+                    <input type="file" id="sig-input" accept="image/png, image/jpeg" multiple>
                 </div>
 
                 <div class="upload-box hidden" id="id-photo-upload-box">
