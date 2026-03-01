@@ -69,13 +69,16 @@ strong {
 .app-container {
     width: 100%;
     max-width: 1100px;
+    min-height: 600px;
+    /* Removed max-height so container grows as needed */
     background: rgba(255, 255, 255, 0.85);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-xl), 0 0 40px rgba(99, 102, 241, 0.1);
     border: 1px solid rgba(255, 255, 255, 0.6);
-    overflow: visible;
+    overflow-y: auto;
+    overflow-x: visible;
     animation: fadeInFloat 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     transform: translateY(20px);
     opacity: 0;
@@ -256,6 +259,8 @@ main {
     border-top: 1px solid var(--border);
     padding-top: 2.5rem;
     animation: fadeIn 0.4s ease-out;
+    /* Remove max-height and overflow so editor section grows with content */
+    box-sizing: border-box;
 }
 
 .hidden {
